@@ -42,9 +42,9 @@ const RockPaperScissors = () => {
 
   const handleChoice = (playerChoice: Choice) => {
     const computerChoice = getComputerChoice();
-    const GameResult = determineWinner(playerChoice, computerChoice);
-    setResult({ playerChoice, computerChoice, result: GameResult });
-    setShowPrize(GameResult === "Win");
+    const gameResult = determineWinner(playerChoice, computerChoice);
+    setResult({ playerChoice, computerChoice, result: gameResult });
+    setShowPrize(gameResult === "Win");
   };
 
   const resetGame = () => {
@@ -54,21 +54,21 @@ const RockPaperScissors = () => {
   };
 
   const claimPrize = () => {
-    setShowModal(true);
+    if (!prizeClaimed) {
+      setShowModal(true);
+    }
   };
 
   return (
     <div className="bg-[#f0f0f0] text-[#333] h-screen w-screen flex justify-center items-center">
       <div className="bg-white p-[2rem] m-[0 0.5rem] w-[400px] max-w-[90%] rounded-lg shadow-md flex flex-col items-center">
         <h2 className="text-sm font-bold mb-4">Rock Paper Scissors</h2>
-        {account ? (
+        {!account ? (
           <ConnectButton
             client={client}
             wallets={[
               inAppWallet({
-                auth: {
-                  options: ["email"],
-                },
+                auth: { options: ["email"] },
               }),
             ]}
           />
@@ -94,23 +94,49 @@ const RockPaperScissors = () => {
                 </div>
               </div>
             ) : (
-              <div>
+              <div className="text-center">
                 <p>You chose: {result.playerChoice}</p>
                 <p>Computer chose: {result.computerChoice}</p>
-                <h3>Result: {result.result}</h3>
-                <div>
+                <h3 className="font-bold text-lg">Result: {result.result}</h3>
+
+                {showPrize && !prizeClaimed && (
                   <button
-                    onClick={resetGame}
-                    className="!bg-green-500 hover:scale-105 active:scale-95 duration-75 text-white px-4 py-2 m-2 rounded-lg"
+                    onClick={claimPrize}
+                    className="!bg-yellow-500 hover:scale-105 active:scale-95 duration-75 text-white px-4 py-2 m-2 rounded-lg"
                   >
-                    Play Again
+                    Claim Prize 🎁
                   </button>
-                </div>
+                )}
+
+                <button
+                  onClick={resetGame}
+                  className="!bg-green-500 hover:scale-105 active:scale-95 duration-75 text-white px-4 py-2 m-2 rounded-lg"
+                >
+                  Play Again
+                </button>
               </div>
             )}
           </>
         )}
       </div>
+
+      {showModal && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <h2 className="text-lg font-bold">Congratulations! 🎉</h2>
+            <p>You won! Your prize is being processed.</p>
+            <button
+              onClick={() => {
+                setPrizeClaimed(true);
+                setShowModal(false);
+              }}
+              className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
